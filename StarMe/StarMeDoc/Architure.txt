@@ -1,0 +1,89 @@
+project-root/
+│
+├── android/
+├── ios/
+├── node_modules/
+│
+├── src/                          # 🔹 Tất cả source code chính của app
+│   ├── api/                      # Gọi API (axios, fetch, etc.)
+│   │   ├── apiClient.ts
+│   │   ├── authApi.ts
+│   │   ├── userApi.ts
+│   │   └── ...
+│   │
+│   ├── assets/                   # Ảnh, icon, font...
+│   │   ├── images/
+│   │   ├── icons/
+│   │   └── fonts/
+│   │
+│   ├── components/               # Các component tái sử dụng
+│   │   ├── common/               # Button, Input, Card...
+│   │   ├── layout/               # Header, Footer, Container...
+│   │   └── ...
+│   │
+│   ├── contexts/                 # Context API (AuthContext, ThemeContext,...)
+│   │   ├── AuthContext.tsx
+│   │   ├── ThemeContext.tsx
+│   │   └── ...
+│   │
+│   ├── hooks/                    # Custom hooks (useFetch, useTheme,...)
+│   │   ├── useAuth.ts
+│   │   ├── useTheme.ts
+│   │   └── ...
+│   │
+│   ├── navigation/               # Điều hướng (React Navigation)
+│   │   ├── AppNavigator.tsx
+│   │   ├── AuthNavigator.tsx
+│   │   └── MainNavigator.tsx
+│   │
+│   ├── screens/                  # Các màn hình chính
+│   │   ├── Auth/
+│   │   │   ├── LoginScreen.tsx
+│   │   │   ├── RegisterScreen.tsx
+│   │   │   └── ForgotPasswordScreen.tsx
+│   │   │
+│   │   ├── Home/
+│   │   │   ├── HomeScreen.tsx
+│   │   │   ├── DetailScreen.tsx
+│   │   │   └── ...
+│   │   │
+│   │   ├── Profile/
+│   │   │   ├── ProfileScreen.tsx
+│   │   │   ├── EditProfileScreen.tsx
+│   │   │   └── ...
+│   │   │
+│   │   └── Settings/
+│   │       ├── SettingsScreen.tsx
+│   │       └── ...
+│   │
+│   ├── services/                 # Xử lý logic nghiệp vụ, lưu trữ local, push notif,...
+│   │   ├── storage.ts
+│   │   ├── notification.ts
+│   │   └── ...
+│   │
+│   ├── store/                    # Redux hoặc Zustand (nếu dùng)
+│   │   ├── index.ts
+│   │   └── userSlice.ts
+│   │
+│   ├── styles/                   # Định nghĩa style toàn cục, theme
+│   │   ├── colors.ts
+│   │   ├── fonts.ts
+│   │   ├── metrics.ts
+│   │   └── globalStyles.ts
+│   │
+│   ├── utils/                    # Helper, format, constant...
+│   │   ├── constants.ts
+│   │   ├── helpers.ts
+│   │   └── validators.ts
+│   │
+│   └── App.tsx                   # Entry chính của app
+│
+├── .env                          # Biến môi trường (API_URL, KEY,...)
+├── .gitignore
+├── app.json
+├── babel.config.js
+├── index.js                      # Điểm khởi đầu (import App.tsx)
+├── metro.config.js
+├── package.json
+├── tsconfig.json
+└── README.md
