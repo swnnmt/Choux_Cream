@@ -2,17 +2,19 @@ import React, { useMemo } from 'react';
 import { View, Text, StyleSheet, Image, FlatList, TouchableOpacity, Dimensions } from 'react-native';
 // @ts-ignore
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import { getMyProfile, getUserMemories, postToMemory } from '../api/mockBackend';
+import { getUserMemories, postToMemory } from '../api/mockBackend';
 import ComponentHeader from '../components/ComponentHeader';
 import { useNavigation } from '@react-navigation/native';
+import { useCurrentUser } from '../hooks/useCurrentUser';
 
 const { width } = Dimensions.get('window');
 
 export default function ProfileScreen() {
-  const currentUser = getMyProfile();
+  const { user: currentUser, loading } = useCurrentUser();
   const navigation = useNavigation<any>();
   
   const memories = useMemo(() => {
+    if (!currentUser) return [];
     const posts = getUserMemories(currentUser._id);
     return posts.map(p => postToMemory(p, currentUser));
   }, [currentUser]);
@@ -20,7 +22,7 @@ export default function ProfileScreen() {
   const renderHeader = () => (
     <View style={styles.profileHeader}>
       <View style={styles.avatarContainer}>
-        <Image source={{ uri: currentUser.avatar }} style={styles.avatar} />
+        <Image source={{ uri: currentUser.avatarUrl || currentUser.avatar }} style={styles.avatar} />
       </View>
       <Text style={styles.username}>{currentUser.username}</Text>
       <Text style={styles.email}>{currentUser.email}</Text>
@@ -38,11 +40,27 @@ export default function ProfileScreen() {
     </View>
   );
 
+  if (loading && !currentUser) {
+    return (
+      <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
+        <Text style={{ color: '#fff' }}>Loading...</Text>
+      </View>
+    );
+  }
+
+  if (!currentUser) {
+     return (
+       <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
+         <Text style={{ color: '#fff' }}>Please login</Text>
+       </View>
+     );
+  }
+
   return (
     <View style={styles.container}>
       <ComponentHeader 
-        userAvatar={currentUser.avatar}
-        renderCenter={() => <Text style={styles.headerTitle}>Profile</Text>}
+        userAvatar={currentUser.avatarUrl || currentUser.avatar}
+        renderCenter={() => <Text style={styles.headerTitle}>@{currentUser.username}</Text>}
         renderRight={() => (
           <TouchableOpacity onPress={() => navigation.navigate('SettingsScreen')}>
             <Ionicons name="settings-outline" size={24} color="#fff" />

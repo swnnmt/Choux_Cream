@@ -16,6 +16,19 @@ const getNotifications = async (req, res, next) => {
   }
 };
 
+// @desc    Get unread count
+// @route   GET /api/notifications/unread-count
+// @access  Private
+const getUnreadCount = async (req, res, next) => {
+    try {
+        const userId = req.user._id;
+        const count = await notificationService.getUnreadCount(userId);
+        sendResponse(res, 200, true, 'Unread count retrieved', { count });
+    } catch (error) {
+        next(error);
+    }
+};
+
 // @desc    Mark notification as read
 // @route   PUT /api/notifications/:id/read
 // @access  Private
@@ -31,7 +44,22 @@ const markRead = async (req, res, next) => {
   }
 }
 
+// @desc    Mark all notifications as read
+// @route   PUT /api/notifications/read-all
+// @access  Private
+const markAllRead = async (req, res, next) => {
+    try {
+        const userId = req.user._id;
+        await notificationService.markAllAsRead(userId);
+        sendResponse(res, 200, true, 'All notifications marked as read');
+    } catch (error) {
+        next(error);
+    }
+}
+
 module.exports = {
   getNotifications,
-  markRead
+  getUnreadCount,
+  markRead,
+  markAllRead
 };

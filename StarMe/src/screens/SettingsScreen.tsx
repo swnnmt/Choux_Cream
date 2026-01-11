@@ -13,18 +13,23 @@ import {
 // @ts-ignore
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useNavigation } from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const SettingsScreen = () => {
   const navigation = useNavigation<any>();
   const [streakEnabled, setStreakEnabled] = useState(false);
 
-  const handleLogout = () => {
-    // Reset navigation stack and go to LoginScreen (in Auth stack) or directly Auth
-    // Assuming 'Auth' is the name of the stack in App.tsx containing LoginScreen
-    navigation.reset({
-      index: 0,
-      routes: [{ name: 'Auth' }],
-    });
+  const handleLogout = async () => {
+    try {
+        await AsyncStorage.multiRemove(['userToken', 'userInfo']);
+        
+        navigation.reset({
+          index: 0,
+          routes: [{ name: 'Auth' }],
+        });
+    } catch (e) {
+        console.error('Logout failed', e);
+    }
   };
 
   const renderSectionHeader = (icon: string, title: string) => (

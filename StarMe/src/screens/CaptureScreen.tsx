@@ -3,12 +3,13 @@ import { View, Text, StyleSheet, Image, TouchableOpacity, TextInput, ActivityInd
 import { useNavigation } from '@react-navigation/native';
 // @ts-ignore
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import { getMyProfile, createPost, CURRENT_USER_ID } from '../api/mockBackend';
+import { createPost, CURRENT_USER_ID } from '../api/mockBackend';
 import { uploadImage } from '../services/uploadService';
 import ComponentHeader from '../components/ComponentHeader';
+import { useCurrentUser } from '../hooks/useCurrentUser';
 
 export default function CaptureScreen() {
-  const currentUser = getMyProfile();
+  const { user } = useCurrentUser();
   const navigation = useNavigation<any>();
   
   // State quản lý ảnh và caption
@@ -58,13 +59,9 @@ export default function CaptureScreen() {
   return (
     <View style={styles.container}>
       <ComponentHeader 
-        userAvatar={currentUser.avatar}
-        renderCenter={() => (
-          <TouchableOpacity style={styles.scopeBtn}>
-            <Text style={styles.scopeText}>Everyone ▾</Text>
-          </TouchableOpacity>
-        )}
-        renderRight={() => <View style={styles.inboxIcon} />}
+        userAvatar={user?.avatarUrl || user?.avatar}
+        renderCenter={() => <Text style={styles.headerTitle}>Máy Ảnh</Text>}
+        onChatPress={() => {}}
       />
 
       <View style={styles.cameraArea}>
@@ -149,7 +146,7 @@ const styles = StyleSheet.create({
   scopeBtn: { paddingHorizontal: 12, paddingVertical: 6, backgroundColor: '#1a1a1a', borderRadius: 16 },
   scopeText: { color: '#fff' },
   inboxIcon: { width: 24, height: 24, borderRadius: 12, backgroundColor: '#333' },
-  
+  headerTitle: { color: '#fff', fontSize: 18, fontWeight: 'bold' },
   cameraArea: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   cameraPreview: { width: '86%', aspectRatio: 1, borderRadius: 24, overflow: 'hidden', backgroundColor: '#1a1a1a', justifyContent: 'center', alignItems: 'center' },
   cameraImage: { width: '100%', height: '100%' },

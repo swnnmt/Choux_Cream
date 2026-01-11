@@ -1,16 +1,17 @@
 import React, { useMemo, useState } from 'react';
 import { View, StyleSheet, FlatList, Image, TouchableOpacity, Dimensions, Platform, StatusBar, Modal, Text } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { getMyProfile, getUserMemories, postToMemory, getFriends, CURRENT_USER_ID, User } from '../api/mockBackend';
+import { getUserMemories, postToMemory, getFriends, CURRENT_USER_ID, User } from '../api/mockBackend';
 import ComponentHeader from '../components/ComponentHeader';
 import StarDetailModal from '../components/StarDetailModal';
+import { useCurrentUser } from '../hooks/useCurrentUser';
 // @ts-ignore
 import Ionicons from 'react-native-vector-icons/Ionicons';
 
 const { width } = Dimensions.get('window');
 
 export default function HistoryGridScreen() {
-  const currentUser = getMyProfile();
+  const { user: currentUser } = useCurrentUser();
   const [selectedMemory, setSelectedMemory] = useState<any>(null);
   
   // Filter State
@@ -22,7 +23,7 @@ export default function HistoryGridScreen() {
   const friends = useMemo(() => getFriends(CURRENT_USER_ID), []);
   const filterUsers = useMemo(() => [
     { _id: 'all', username: 'Everyone', avatar: '' }, 
-    currentUser, 
+    ...(currentUser ? [currentUser] : []), 
     ...friends
   ], [currentUser, friends]);
 
@@ -84,6 +85,7 @@ export default function HistoryGridScreen() {
     });
   }, [currentFilterId, filterUsers, currentUser, friends]);
 
+  
   const onSelectFilter = (user: any) => {
     setCurrentFilterId(user._id);
     setCurrentFilterName(user.username);
@@ -121,7 +123,7 @@ export default function HistoryGridScreen() {
   return (
     <View style={styles.container}>
       <ComponentHeader 
-        userAvatar={currentUser.avatar}
+        userAvatar={currentUser?.avatarUrl || currentUser?.avatar}
         renderCenter={() => <FilterBtn />}
         onChatPress={() => {}} // Dummy action
       />

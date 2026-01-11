@@ -7,9 +7,14 @@ connectDB();
 
 const PORT = config.port;
 
+const { initSocket } = require('./socket');
+
 const server = app.listen(PORT, () => {
   console.log(`Server running in ${config.env} mode on port ${PORT}`);
 });
+
+// Initialize Socket.IO
+initSocket(server);
 
 // Handle unhandled promise rejections
 process.on('unhandledRejection', (err, promise) => {

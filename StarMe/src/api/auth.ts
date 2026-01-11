@@ -59,7 +59,14 @@ export const authApi = {
     await AsyncStorage.removeItem('userToken');
     await AsyncStorage.removeItem('userInfo');
   },
-
+  getMe: async () => {
+    try {
+      const response = await client.get('/auth/me'); // Interceptor sẽ tự động thêm token vào đây
+      return response.data;
+    } catch (error: any) {
+      throw error.response?.data || error.message;
+    }
+  },
   updateProfile: async (data: any) => {
       const response = await client.put('/auth/profile', data);
       return response.data;
