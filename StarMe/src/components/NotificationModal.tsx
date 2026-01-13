@@ -166,10 +166,10 @@ const NotificationModal: React.FC<NotificationModalProps> = ({ visible, onClose,
 
   const getNotificationTypeLabel = (type: string) => {
     switch(type) {
-      case 'new_post': return 'New Post';
+      case 'new_post': return 'Khoảnh khắc';
       case 'reaction': return 'Reacted to your post';
-      case 'friend_request': return 'Sent you a friend request';
-      case 'like': return 'Liked your post'; // Keep for backward compatibility
+      case 'friend_request': return 'Lời mời kết bạn';
+      case 'like': return 'Đã thích ảnh của bạn'; // Keep for backward compatibility
       case 'comment': return 'Commented on your post';
       case 'follow': return 'Started following you';
       case 'mention': return 'Mentioned you';
@@ -180,9 +180,9 @@ const NotificationModal: React.FC<NotificationModalProps> = ({ visible, onClose,
   const getNotificationMessage = (item: NotificationItem) => {
     // If backend doesn't provide message, generate one
     switch(item.type) {
-      case 'new_post': return 'posted a new photo';
+      case 'new_post': return 'đã có 1 khoảnh khắc';
       case 'reaction': return 'reacted to your photo';
-      case 'friend_request': return 'wants to be friends';
+      case 'friend_request': return 'muốn trở thành bạn bè';
       default: return '';
     }
   };

@@ -1,10 +1,12 @@
-import React, { useMemo, useState } from 'react';
-import { View, StyleSheet, FlatList, Image, TouchableOpacity, Dimensions, Platform, StatusBar, Modal, Text } from 'react-native';
+import React, { useMemo, useState, useEffect, useCallback } from 'react';
+import { View, StyleSheet, FlatList, Image, TouchableOpacity, Dimensions, Platform, StatusBar, Modal, Text, ActivityIndicator, RefreshControl } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { getUserMemories, postToMemory, getFriends, CURRENT_USER_ID, User } from '../api/mockBackend';
+import { getFriends, CURRENT_USER_ID, User } from '../api/mockBackend';
+import { postApi } from '../api/post';
 import ComponentHeader from '../components/ComponentHeader';
 import StarDetailModal from '../components/StarDetailModal';
 import { useCurrentUser } from '../hooks/useCurrentUser';
+import { Memory } from '../types/memory';
 // @ts-ignore
 import Ionicons from 'react-native-vector-icons/Ionicons';
 
@@ -13,6 +15,8 @@ const { width } = Dimensions.get('window');
 export default function HistoryGridScreen() {
   const { user: currentUser } = useCurrentUser();
   const [selectedMemory, setSelectedMemory] = useState<any>(null);
+  const [memories, setMemories] = useState<Memory[]>([]);
+  const [loading, setLoading] = useState(false);
   
   // Filter State
   const [filterVisible, setFilterVisible] = useState(false);
@@ -27,63 +31,54 @@ export default function HistoryGridScreen() {
     ...friends
   ], [currentUser, friends]);
 
-  // Filtered Memories
-  const memories = useMemo(() => {
-    // If 'all', we might want to show everyone's memories OR just mine?
-    // Locket "History" usually implies MY history.
-    // But user asked: "view friends list, click one -> show their photos".
-    // So 'all' -> maybe just Friends Feed (or mixed history)?
-    // Let's assume 'all' -> My History + Friends History (Feed Grid) OR just My History.
-    // Given the prompt "view friends list", let's make the default view "My History" or "All Friends".
-    // Let's go with: 'all' = My History (Standard Locket behavior for main grid is user-centric, but user asked for friend explorer).
-    
-    // Logic: 
-    // If 'all': show current user's memories (or feed?). 
-    // Let's follow the specific instruction: "view friends list... show their photos".
-    // So default 'Everyone' might actually mean "All Friends Feed" or just "Me".
-    // Let's try: 'all' -> All Friends Feed (Grid version).
-    
-    let posts;
-    if (currentFilterId === 'all') {
-      // Show my memories + friends memories (All Public/Friends posts)
-      // For simplicity, let's just reuse getUserMemories for everyone in the list
-      // Or better, let's filter POSTS directly.
-      // Since we don't have a "getAllMemories" helper, let's iterate.
-      // But wait, getFriendsFeed returns the feed. Let's use that for 'all' to show latest stuff.
-      // OR better: Default to Current User if no filter selected?
-      // The user wants to "view friends list".
-      
-      // Let's implement: 'all' -> Current User's History (Standard Profile Grid)
-      // And then switch to friend.
-      // OR 'all' -> Feed Grid.
-      
-      // Let's go with: 'all' -> All Friends + Me (Feed Grid).
-      const allIds = [CURRENT_USER_ID, ...friends.map(f => f._id)];
-      // We need a helper or just filter raw POSTS (we can import POSTS if we export it, or add helper)
-      // For now, let's just use getUserMemories(currentUser) for default if logic is complex, 
-      // BUT user wants to see friends.
-      
-      // Let's assume for 'all' we show the User's Own History (Locket style).
-      // If they pick a friend, we show that friend's history.
-      
-      // Wait, "Everyone" implies... Everyone.
-      // Let's stick to: 'all' -> Feed (Friends + Me).
-      const { POSTS } = require('../api/mockBackend'); // Dynamic import to access raw data if needed or add helper
-      posts = POSTS.filter((p: any) => allIds.includes(p.user));
-    } else {
-      posts = getUserMemories(currentFilterId);
+  const fetchHistory = useCallback(async () => {
+    setLoading(true);
+    try {
+      let posts = [];
+      if (currentFilterId === 'all') {
+        // If 'all', fetch feed (friends + me) or just use the same feed API
+        // Reusing getFeed from postApi which returns friends' posts
+        // But "History" usually means *MY* posts or specific user posts.
+        // If "Everyone", let's assume it matches the Feed logic for now, or just My Posts?
+        // Let's stick to "My Posts" + Friends if 'all' means Feed Grid.
+        // Actually, let's use getFeed() for 'all' to be consistent with "Everyone".
+        posts = await postApi.getFeed();
+      } else {
+        // Fetch specific user's posts
+        posts = await postApi.getUserPosts(currentFilterId);
+      }
+
+      if (Array.isArray(posts)) {
+         const mappedMemories: Memory[] = posts.map((post: any) => ({
+          id: post._id,
+          userId: post.user?._id || post.user,
+          text: post.caption,
+          media: post.imageUrl ? [{ type: 'image', url: post.imageUrl }] : [],
+          createdAt: post.createdAt,
+          x: Math.random(),
+          y: Math.random(),
+          author: post.user && typeof post.user === 'object' ? {
+            username: post.user.username,
+            avatar: post.user.avatar || post.user.avatarUrl
+          } : undefined
+        }));
+        // Sort by new
+        mappedMemories.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+        setMemories(mappedMemories);
+      } else {
+        setMemories([]);
+      }
+    } catch (error) {
+      console.error('Failed to load history', error);
+      setMemories([]);
+    } finally {
+      setLoading(false);
     }
-    
-    // Sort by new
-    posts.sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-    
-    // Map to frontend memory
-    return posts.map((p: any) => {
-      // Find user for this post
-      const author = filterUsers.find(u => u._id === p.user) || currentUser;
-      return postToMemory(p, author as User);
-    });
-  }, [currentFilterId, filterUsers, currentUser, friends]);
+  }, [currentFilterId]);
+
+  useEffect(() => {
+    fetchHistory();
+  }, [fetchHistory]);
 
   
   const onSelectFilter = (user: any) => {
@@ -131,10 +126,24 @@ export default function HistoryGridScreen() {
       <FlatList
         data={memories}
         keyExtractor={(item) => item.id}
-        numColumns={3}
         renderItem={renderItem}
+        numColumns={3}
         contentContainerStyle={styles.listContent}
         showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl refreshing={loading} onRefresh={fetchHistory} tintColor="#fff" />
+        }
+        ListEmptyComponent={
+          <View style={{ padding: 20, alignItems: 'center', marginTop: 50 }}>
+            {loading ? (
+              <ActivityIndicator size="large" color="#FFD700" />
+            ) : (
+              <Text style={{ color: '#888', textAlign: 'center' }}>
+                No history found.{'\n'}Try selecting a different user.
+              </Text>
+            )}
+          </View>
+        }
       />
 
       {selectedMemory && (

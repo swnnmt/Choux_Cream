@@ -29,19 +29,16 @@ const createPost = async (userId, postData) => {
  * Get feed (posts from friends)
  */
 const getFriendsFeed = async (userId, page = 1, limit = 10) => {
-  // 1. Get list of friends
-  // We can reuse friendService logic here.
-  // Note: This returns full user objects, we need IDs.
   const friends = await friendService.getFriends(userId);
   const friendIds = friends.map(f => f._id);
 
-  // Include user's own posts? Locket usually shows friends' posts.
-  // Let's include both for a standard feed, or just friends depending on strict Locket clone.
-  // Locket main view is "History" (friends)
-  
+  const now = new Date();
+  const last24Hours = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+
   const query = {
     userId: { $in: friendIds },
-    privacy: { $ne: 'private' } // Don't show private posts if we had that logic
+    privacy: { $ne: 'private' },
+    createdAt: { $gte: last24Hours },
   };
 
   const posts = await Post.find(query)
@@ -52,6 +49,7 @@ const getFriendsFeed = async (userId, page = 1, limit = 10) => {
 
   return posts;
 };
+
 
 /**
  * Get user memories (my posts)
