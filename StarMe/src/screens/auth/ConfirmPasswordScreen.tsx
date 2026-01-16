@@ -45,8 +45,7 @@ const ConfirmPasswordScreen = () => {
           platform: 'android'
         };
         await authApi.register(payload);
-        // Success go to MainTabs
-        navigation.reset({ index: 0, routes: [{ name: 'MainTabs' }] });
+        navigation.reset({ index: 0, routes: [{ name: 'Intro' }] });
       } catch (error: any) {
           Alert.alert(error.message || 'Đăng ký thất bại');
       } finally {

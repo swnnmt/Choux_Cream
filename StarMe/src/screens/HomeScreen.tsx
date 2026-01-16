@@ -250,7 +250,7 @@ export default function HomeScreen() {
       <ComponentHeader
         userAvatar={user?.avatarUrl || user?.avatar}
         renderCenter={() => (
-          <Text style={styles.headerTitle}>Locket Feed</Text>
+          <Text style={styles.headerTitle}>Choux Cream</Text>
         )}
         renderRight={() => (
           <TouchableOpacity

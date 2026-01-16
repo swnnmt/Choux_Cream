@@ -5,7 +5,6 @@ export interface User {
   username: string;
   avatar?: string;
   avatarUrl?: string;
-  // Add other fields as needed
 }
 
 export const userApi = {
@@ -17,5 +16,15 @@ export const userApi = {
       console.error('getUserById error:', error);
       return null;
     }
-  }
+  },
+
+  getFriends: async () => {
+    try {
+      const response = await client.get('/friends');
+      return response.data;
+    } catch (error) {
+      console.error('getFriends error:', error);
+      return [];
+    }
+  },
 };

@@ -22,7 +22,6 @@ export const postApi = {
   getFeed: async () => {
     try {
       const response = await client.get('/posts/feed');
-      // Handle both array response and { data: [] } format
       if (Array.isArray(response.data)) {
         return response.data;
       }
@@ -35,19 +34,30 @@ export const postApi = {
       return [];
     }
   },
-  
-  // Keep other potential methods in mind for future
-  createPost: async (data: FormData) => {
+
+  createPost: async (data: { imageUrl: string; caption?: string; emotion?: string; privacy?: string }) => {
     try {
-      const response = await client.post('/posts', data, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      });
+      const response = await client.post('/posts', data);
       return response.data;
     } catch (error) {
       console.error('createPost error:', error);
       throw error;
+    } 
+  },
+
+  getMemories: async () => {
+    try {
+      const response = await client.get('/posts/memories');
+      if (Array.isArray(response.data)) {
+        return response.data;
+      }
+      if (response.data && Array.isArray(response.data.data)) {
+        return response.data.data;
+      }
+      return [];
+    } catch (error) {
+      console.error('getMemories error:', error);
+      return [];
     }
   },
 
@@ -65,5 +75,5 @@ export const postApi = {
       console.error('getUserPosts error:', error);
       return [];
     }
-  }
+  },
 };

@@ -3,49 +3,41 @@ import { View, Text, StyleSheet, Image, TouchableOpacity, TextInput, ActivityInd
 import { useNavigation } from '@react-navigation/native';
 // @ts-ignore
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import { createPost, CURRENT_USER_ID } from '../api/mockBackend';
-import { uploadImage } from '../services/uploadService';
 import ComponentHeader from '../components/ComponentHeader';
 import { useCurrentUser } from '../hooks/useCurrentUser';
+import { uploadApi } from '../api/upload';
+import { postApi } from '../api/post';
 
 export default function CaptureScreen() {
   const { user } = useCurrentUser();
   const navigation = useNavigation<any>();
-  
-  // State quản lý ảnh và caption
   const [imageUri, setImageUri] = useState<string | null>(null);
   const [caption, setCaption] = useState('');
-  
-  // State quản lý trạng thái upload
   const [isUploading, setIsUploading] = useState(false);
 
-  // Giả lập chụp ảnh (Thay thế bằng react-native-image-picker hoặc react-native-vision-camera ở đây)
   const capture = () => {
     const r = Math.floor(Math.random() * 10000);
-    // Trong thực tế, đây sẽ là đường dẫn file:// trên điện thoại
     const uri = `https://picsum.photos/600/800?random=${r}`;
     setImageUri(uri);
   };
 
-  // Hàm đăng bài chuẩn "Backend Flow"
   const post = async () => {
     if (!imageUri) return;
 
     try {
-      setIsUploading(true); // Bắt đầu loading
+      setIsUploading(true);
 
-      // BƯỚC 1: Upload ảnh lên Storage Server
-      // (Hàm này giả lập delay và trả về URL)
-      const remoteImageUrl = await uploadImage(imageUri);
+      const remoteImageUrl = await uploadApi.uploadPostImage(imageUri);
+      await postApi.createPost({
+        imageUrl: remoteImageUrl,
+        caption: caption || '',
+        privacy: "friends",
+        emotion: "happy"
+      });
 
-      // BƯỚC 2: Gọi API tạo bài viết với URL ảnh đã upload
-      createPost(CURRENT_USER_ID, remoteImageUrl, caption);
-
-      // Reset form
       setCaption('');
       setImageUri(null);
       
-      // Navigate về Feed
       navigation.navigate('Memory'); 
 
     } catch (error) {

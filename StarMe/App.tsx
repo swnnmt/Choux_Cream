@@ -11,6 +11,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import TabNavigator from './src/navigation/TabNavigator';
 import AuthNavigator from './src/navigation/AuthNavigator';
 import SettingsScreen from './src/screens/SettingsScreen';
+import IntroScreen from './src/screens/intro/IntroScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -54,16 +55,10 @@ export default function App() {
 
         <NavigationContainer>
           <Stack.Navigator screenOptions={{ headerShown: false }} initialRouteName={initialRoute}>
-            {/* Auth Flow */}
             <Stack.Screen name="Auth" component={AuthNavigator} />
-            
-            {/* Tab chính */}
+            <Stack.Screen name="Intro" component={IntroScreen} />
             <Stack.Screen name="MainTabs" component={TabNavigator} />
-            
             <Stack.Screen name="SettingsScreen" component={SettingsScreen} />
-
-            {/* sau này bạn có thể thêm màn khác như */}
-            {/* <Stack.Screen name="MemoryDetail" component={MemoryDetailScreen} /> */}
           </Stack.Navigator>
         </NavigationContainer>
       </GestureHandlerRootView>

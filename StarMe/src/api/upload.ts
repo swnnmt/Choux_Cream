@@ -33,7 +33,7 @@ export const uploadApi = {
       },
     });
 
-    return res.data.url;
+    return res.data.data?.url || res.data.url;
   },
 
   uploadPostVideo: async (videoPath: string) => {

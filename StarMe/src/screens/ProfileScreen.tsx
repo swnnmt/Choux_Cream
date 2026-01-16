@@ -1,22 +1,75 @@
-import React, { useMemo } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, Image, FlatList, TouchableOpacity, Dimensions } from 'react-native';
 // @ts-ignore
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import { getUserMemories, postToMemory } from '../api/mockBackend';
 import ComponentHeader from '../components/ComponentHeader';
 import { useNavigation } from '@react-navigation/native';
 import { useCurrentUser } from '../hooks/useCurrentUser';
+import { postApi } from '../api/post';
+import { userApi } from '../api/user';
+import { Memory } from '../types/memory';
 
 const { width } = Dimensions.get('window');
 
 export default function ProfileScreen() {
   const { user: currentUser, loading } = useCurrentUser();
   const navigation = useNavigation<any>();
+  const [memories, setMemories] = useState<Memory[]>([]);
+  const [friendCount, setFriendCount] = useState(0);
   
-  const memories = useMemo(() => {
-    if (!currentUser) return [];
-    const posts = getUserMemories(currentUser._id);
-    return posts.map(p => postToMemory(p, currentUser));
+  useEffect(() => {
+    const fetchData = async () => {
+      if (!currentUser) {
+        setMemories([]);
+        setFriendCount(0);
+        return;
+      }
+
+      try {
+        const posts = await postApi.getMemories();
+
+        if (Array.isArray(posts)) {
+          const mapped: Memory[] = posts.map((post: any) => {
+            const userData = post.user || post.userId || currentUser;
+            return {
+              id: post._id,
+              userId: userData?._id || userData,
+              text: post.caption,
+              media: post.imageUrl ? [{ type: 'image', url: post.imageUrl }] : [],
+              createdAt: post.createdAt,
+              x: Math.random(),
+              y: Math.random(),
+              author:
+                userData && typeof userData === 'object'
+                  ? {
+                      username: userData.username,
+                      avatar: userData.avatar || userData.avatarUrl,
+                    }
+                  : undefined,
+            };
+          });
+          setMemories(mapped);
+        } else {
+          setMemories([]);
+        }
+
+        const friendsResponse = await userApi.getFriends();
+        let friendsList: any[] = [];
+
+        if (Array.isArray(friendsResponse)) {
+          friendsList = friendsResponse;
+        } else if (friendsResponse && Array.isArray(friendsResponse.data)) {
+          friendsList = friendsResponse.data;
+        }
+
+        setFriendCount(friendsList.length);
+      } catch (error) {
+        setMemories([]);
+        setFriendCount(0);
+      }
+    };
+
+    fetchData();
   }, [currentUser]);
 
   const renderHeader = () => (
@@ -33,7 +86,7 @@ export default function ProfileScreen() {
            <Text style={styles.statLabel}>Memories</Text>
         </View>
         <View style={styles.statItem}>
-           <Text style={styles.statNumber}>120</Text>
+           <Text style={styles.statNumber}>{friendCount}</Text>
            <Text style={styles.statLabel}>Friends</Text>
         </View>
       </View>

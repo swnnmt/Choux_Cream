@@ -1,13 +1,5 @@
 import React, { useState } from 'react';
-import {
-  View,
-  TextInput,
-  TouchableOpacity,
-  Text,
-  StyleSheet,
-  ActivityIndicator,
-  Alert
-} from 'react-native';
+import { View, TextInput, TouchableOpacity, Text, StyleSheet, ActivityIndicator, Alert } from 'react-native';
 import AuthLayout from './AuthLayout';
 // @ts-ignore
 import Ionicons from 'react-native-vector-icons/Ionicons';
@@ -52,8 +44,16 @@ const LoginScreen = () => {
     }
   };
 
+  const handleComplete = async () => {
+    navigation.reset({ index: 0, routes: [{ name: 'Intro' }] });
+  }
+
   return (
-    <AuthLayout title="Chào mừng trở lại" showBack={false}>
+    <AuthLayout
+      title="Choux Cream"
+      subtitle="Đăng nhập để tiếp tục hành trình ngọt ngào"
+      showBack={false}
+    >
       <View style={styles.inputContainer}>
         <Ionicons name="mail-outline" size={20} color="#9CA3AF" style={styles.icon} />
         <TextInput
@@ -87,7 +87,9 @@ const LoginScreen = () => {
         </TouchableOpacity>
       </View>
 
-      <TouchableOpacity style={styles.forgotPassword}>
+      <TouchableOpacity 
+      onPress={handleComplete}
+      style={styles.forgotPassword}>
         <Text style={styles.linkText}>Quên mật khẩu?</Text>
       </TouchableOpacity>
 
@@ -132,13 +134,13 @@ const styles = StyleSheet.create({
   inputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#1E1E22',
+    backgroundColor: '#111827',
     borderRadius: 16,
     paddingHorizontal: 16,
     height: 56,
     marginBottom: 16,
     borderWidth: 1,
-    borderColor: '#333',
+    borderColor: '#F9A8D4',
   },
   icon: {
     marginRight: 12,
@@ -153,7 +155,7 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   button: {
-    backgroundColor: '#A78BFA',
+    backgroundColor: '#FBBF24',
     height: 52,
     borderRadius: 16,
     justifyContent: 'center',
@@ -189,11 +191,11 @@ const styles = StyleSheet.create({
       width: 52,
       height: 52,
       borderRadius: 26,
-      backgroundColor: '#1E1E22',
+      backgroundColor: '#111827',
       justifyContent: 'center',
       alignItems: 'center',
       borderWidth: 1,
-      borderColor: '#333',
+      borderColor: '#4B5563',
   },
   footer: {
     flexDirection: 'row',
@@ -204,7 +206,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
   linkText: {
-    color: '#A78BFA',
+    color: '#EC4899',
     fontSize: 14,
     fontWeight: '600',
   },
